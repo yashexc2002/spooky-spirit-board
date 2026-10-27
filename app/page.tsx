@@ -12,18 +12,39 @@ export default function Home() {
   const [isSummoning, setIsSummoning] = useState(false);
   
   const [isSoundOn, setIsSoundOn] = useState(false);
-  
-  // NAYA: Language State
-  const [language, setLanguage] = useState("English");
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const worker = useRef<Worker | null>(null);
+
+  // GHOST VOICE IN ENGLISH (Demonic Pitch)
+  const speakGhostly = (text: string) => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel(); 
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    utterance.pitch = 0.1; 
+    utterance.rate = 0.7;  
+    utterance.volume = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    // Sirf English voice dhoondhega
+    const targetVoice = voices.find(v => v.lang.includes('en-GB') || v.lang.includes('en-US'));
+
+    if (targetVoice) {
+      utterance.voice = targetVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     if (!fullAnswer) return;
     
     setDisplayedAnswer(""); 
     let i = 0;
+    
+    speakGhostly(fullAnswer);
     
     const typingInterval = setInterval(() => {
       setDisplayedAnswer((prev) => prev + fullAnswer.charAt(i));
@@ -36,7 +57,6 @@ export default function Home() {
 
     return () => clearInterval(typingInterval);
   }, [fullAnswer]);
-
 
   const toggleSound = () => {
     if (isSoundOn) {
@@ -122,28 +142,15 @@ export default function Home() {
     setFullAnswer(""); 
     setDisplayedAnswer("Consulting the beyond..."); 
     
-    // NAYA: AI ko question ke sath user ki selected Language bhi bhej rahe hain
-    worker.current?.postMessage({ text: question, language: language });
+    window.speechSynthesis.cancel();
+    worker.current?.postMessage({ text: question });
     setQuestion(""); 
-  };
-
-  // NAYA: Language change karne wala function
-  const toggleLanguage = () => {
-    setLanguage((prev) => prev === "English" ? "Hinglish" : "English");
   };
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-300 font-serif flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden">
       
-      {/* NAYA: Language Toggle Button (Top Left) */}
-      <button 
-        onClick={toggleLanguage}
-        className="absolute top-4 left-4 md:top-6 md:left-6 border border-zinc-800 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors z-10"
-      >
-        Lang: {language}
-      </button>
-
-      {/* Sound Toggle Button (Top Right) */}
+      {/* Sound Button */}
       <button 
         onClick={toggleSound}
         className="absolute top-4 right-4 md:top-6 md:right-6 border border-zinc-800 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors z-10"

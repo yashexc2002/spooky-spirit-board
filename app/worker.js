@@ -26,13 +26,8 @@ self.addEventListener('message', async (event) => {
         try {
             let generator = await PipelineSingleton.getInstance();
             
-            // NAYA: Language ke hisaab se Ghost ko instruction dena
-            let prompt = "";
-            if (event.data.language === 'Hinglish') {
-                prompt = `Ghost responds to: "${event.data.text}". Ghost says in short, creepy Hinglish (Hindi written in English letters):`;
-            } else {
-                prompt = `Ghost responds to: "${event.data.text}". Ghost says in short, creepy English:`;
-            }
+            // AI ko sirf English mein creepy jawab dene ko bola hai
+            let prompt = `Ghost responds to: "${event.data.text}". Ghost says in short, creepy English:`;
 
             let output = await generator(prompt, {
                 max_new_tokens: 30,
