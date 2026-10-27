@@ -4,7 +4,6 @@ env.allowLocalModels = false;
 
 class PipelineSingleton {
     static task = 'text-generation';
-    // Humne ek chhota aur fast model laga diya hai jo kisi bhi laptop par second mein chalega (Sirf ~70MB)
     static model = 'Xenova/LaMini-Neo-125M'; 
     static instance = null;
 
@@ -27,8 +26,13 @@ self.addEventListener('message', async (event) => {
         try {
             let generator = await PipelineSingleton.getInstance();
             
-            // Chote model ke hisaab se simple prompt
-            const prompt = `Ghost responds to: "${event.data.text}". Ghost says:`;
+            // NAYA: Language ke hisaab se Ghost ko instruction dena
+            let prompt = "";
+            if (event.data.language === 'Hinglish') {
+                prompt = `Ghost responds to: "${event.data.text}". Ghost says in short, creepy Hinglish (Hindi written in English letters):`;
+            } else {
+                prompt = `Ghost responds to: "${event.data.text}". Ghost says in short, creepy English:`;
+            }
 
             let output = await generator(prompt, {
                 max_new_tokens: 30,
@@ -36,7 +40,6 @@ self.addEventListener('message', async (event) => {
                 do_sample: true,
             });
 
-            // SAFE EXTRACTION: Taki code kabhi crash na ho
             let responseText = output[0].generated_text.replace(prompt, '').trim();
 
             self.postMessage({
@@ -45,7 +48,6 @@ self.addEventListener('message', async (event) => {
             });
 
         } catch (error) {
-            // Agar koi error aata hai, toh UI hang nahi hoga, screen par error dikhega
             self.postMessage({
                 status: 'complete',
                 output: "The connection broke... try again."

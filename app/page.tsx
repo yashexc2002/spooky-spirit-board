@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [question, setQuestion] = useState("");
-  // Ghost ka final jawab yahan save hoga
   const [fullAnswer, setFullAnswer] = useState(""); 
-  // Screen par jo ek-ek letter type hoga woh yahan aayega
   const [displayedAnswer, setDisplayedAnswer] = useState("The spirits are listening...");
   
   const [isReady, setIsReady] = useState(false);
@@ -14,14 +12,17 @@ export default function Home() {
   const [isSummoning, setIsSummoning] = useState(false);
   
   const [isSoundOn, setIsSoundOn] = useState(false);
+  
+  // NAYA: Language State
+  const [language, setLanguage] = useState("English");
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const worker = useRef<Worker | null>(null);
 
-  // GHOST TYPING EFFECT (Typewriter)
   useEffect(() => {
     if (!fullAnswer) return;
     
-    setDisplayedAnswer(""); // Purana text clear karo
+    setDisplayedAnswer(""); 
     let i = 0;
     
     const typingInterval = setInterval(() => {
@@ -29,15 +30,14 @@ export default function Home() {
       i++;
       if (i >= fullAnswer.length) {
         clearInterval(typingInterval);
-        setIsSummoning(false); // Typing khatam hone ke baad button wapas chalu karo
+        setIsSummoning(false); 
       }
-    }, 60); // 60ms ka delay - thoda slow aur creepy
+    }, 60); 
 
     return () => clearInterval(typingInterval);
   }, [fullAnswer]);
 
 
-  // HORROR SOUND FUNCTION
   const toggleSound = () => {
     if (isSoundOn) {
       if (audioCtxRef.current) {
@@ -91,7 +91,6 @@ export default function Home() {
     }
   };
 
-  // AI WORKER SETUP
   useEffect(() => {
     if (!worker.current) {
       worker.current = new Worker(new URL('./worker.js', import.meta.url), {
@@ -108,7 +107,7 @@ export default function Home() {
           setLoadingMsg("");
           setDisplayedAnswer("The spirits are ready...");
         } else if (data.status === 'complete') {
-          setFullAnswer(data.output); // Ghost ne jawab bhej diya, ab typing shuru hogi
+          setFullAnswer(data.output); 
         }
       });
 
@@ -120,17 +119,31 @@ export default function Home() {
     if (!question.trim() || isSummoning || !isReady) return;
     
     setIsSummoning(true);
-    setFullAnswer(""); // Purana answer clear karo
-    setDisplayedAnswer("Consulting the beyond..."); // Loading text
+    setFullAnswer(""); 
+    setDisplayedAnswer("Consulting the beyond..."); 
     
-    worker.current?.postMessage({ text: question });
+    // NAYA: AI ko question ke sath user ki selected Language bhi bhej rahe hain
+    worker.current?.postMessage({ text: question, language: language });
     setQuestion(""); 
+  };
+
+  // NAYA: Language change karne wala function
+  const toggleLanguage = () => {
+    setLanguage((prev) => prev === "English" ? "Hinglish" : "English");
   };
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-300 font-serif flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden">
       
-      {/* Sound Button - Mobile Responsive */}
+      {/* NAYA: Language Toggle Button (Top Left) */}
+      <button 
+        onClick={toggleLanguage}
+        className="absolute top-4 left-4 md:top-6 md:left-6 border border-zinc-800 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors z-10"
+      >
+        Lang: {language}
+      </button>
+
+      {/* Sound Toggle Button (Top Right) */}
       <button 
         onClick={toggleSound}
         className="absolute top-4 right-4 md:top-6 md:right-6 border border-zinc-800 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors z-10"
@@ -144,7 +157,6 @@ export default function Home() {
         Spirit <span className="text-red-900/60">Board</span>
       </h1>
 
-      {/* Answer Board - Mobile Responsive */}
       <div className="w-full max-w-2xl bg-[#0a0a0a] border border-zinc-900 shadow-[0_0_30px_rgba(0,0,0,0.9)] md:shadow-[0_0_50px_rgba(0,0,0,0.9)] p-6 md:p-10 rounded-sm mb-8 md:mb-12 min-h-[150px] md:min-h-[200px] flex flex-col items-center justify-center text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dust.png')] pointer-events-none"></div>
         
@@ -155,13 +167,11 @@ export default function Home() {
         ) : (
           <p className="text-lg sm:text-xl md:text-3xl text-zinc-400 italic tracking-wide">
             "{displayedAnswer}"
-            {/* Blinking cursor effect jab typing chal rahi ho */}
             {isSummoning && fullAnswer && <span className="animate-ping ml-1">|</span>}
           </p>
         )}
       </div>
 
-      {/* Input Area - Mobile Responsive */}
       <div className="w-full max-w-2xl flex flex-col md:flex-row items-center gap-6 md:gap-8 relative">
         <input
           type="text"
