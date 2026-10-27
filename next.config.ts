@@ -1,19 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  experimental: {
-    agentFeedback: true,
-  },
-  cacheComponents: true,
-  partialPrefetching: true,
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
+  // YEH LINE ADD KI HAI:
+  allowedDevOrigins: ['10.95.203.129', 'localhost'],
+  
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "sharp$": false,
+      "onnxruntime-node$": false,
+    };
+    return config;
   },
 };
 
