@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // YEH LINE ADD KI HAI:
   allowedDevOrigins: ['10.95.203.129', 'localhost'],
   
   webpack: (config) => {

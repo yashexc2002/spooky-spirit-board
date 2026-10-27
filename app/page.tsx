@@ -16,7 +16,6 @@ export default function Home() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const worker = useRef<Worker | null>(null);
 
-  // GHOST VOICE IN ENGLISH (Demonic Pitch)
   const speakGhostly = (text: string) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); 
@@ -28,7 +27,6 @@ export default function Home() {
     utterance.volume = 1.0;
 
     const voices = window.speechSynthesis.getVoices();
-    // Sirf English voice dhoondhega
     const targetVoice = voices.find(v => v.lang.includes('en-GB') || v.lang.includes('en-US'));
 
     if (targetVoice) {
@@ -150,7 +148,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-300 font-serif flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden">
       
-      {/* Sound Button */}
       <button 
         onClick={toggleSound}
         className="absolute top-4 right-4 md:top-6 md:right-6 border border-zinc-800 px-3 py-1.5 md:px-4 md:py-2 text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:border-red-900/40 transition-colors z-10"
